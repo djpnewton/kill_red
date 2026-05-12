@@ -74,6 +74,7 @@ pub const Map = struct {
     show_banner: bool,
     has_green: bool,
     show_failed: bool,
+    show_complete: bool,
 
     pub fn update(self: *Map) void {
         const W: f32 = @floatFromInt(rl.getScreenWidth());
@@ -96,6 +97,15 @@ pub const Map = struct {
                     return;
                 }
             }
+        }
+
+        // --- complete overlay: restart from level 0 on click ---
+        if (self.show_complete) {
+            if (rl.isMouseButtonPressed(.left) or rl.isGestureDetected(.{ .tap = true })) {
+                self.destroyWorld();
+                self.* = loadLevel(0);
+            }
+            return;
         }
 
         // --- failed overlay: restart on click ---
@@ -150,6 +160,21 @@ pub const Map = struct {
                     if (b.alive) b2.b2Body_SetAwake(b.body_id, true);
                 }
                 self.drag_idx = null;
+            }
+        }
+
+        // --- restart button (bottom-left) ---
+        {
+            const H_f: f32 = @floatFromInt(rl.getScreenHeight());
+            const btn_w: f32 = 90;
+            const btn_h: f32 = 32;
+            const btn_rec = rl.Rectangle{ .x = 12, .y = H_f - btn_h - 12, .width = btn_w, .height = btn_h };
+            if (rl.isMouseButtonPressed(.left)) {
+                if (rl.checkCollisionPointRec(rl.getMousePosition(), btn_rec)) {
+                    self.destroyWorld();
+                    self.* = loadLevel(self.level);
+                    return;
+                }
             }
         }
 
@@ -216,10 +241,11 @@ pub const Map = struct {
             }
         }
         if (red_count == 0 and green_settled and (!self.has_green or green_alive > 0)) {
-            const next = (self.level + 1) % levels.len;
-            if (next != self.level) {
+            if (self.level + 1 >= levels.len) {
+                self.show_complete = true;
+            } else {
                 self.destroyWorld();
-                self.* = loadLevel(next);
+                self.* = loadLevel(self.level + 1);
             }
         }
     }
@@ -335,6 +361,7 @@ fn loadLevel(index: usize) Map {
         .show_banner = def.banner != null,
         .has_green = false,
         .show_failed = false,
+        .show_complete = false,
     };
 
     for (def.defs, 0..) |d, i| {
@@ -505,6 +532,38 @@ pub fn draw() void {
         rl.drawText("Failed!", bx + 20, by + 18, 26, rl.Color.init(230, 80, 80, 255));
         rl.drawText("A green shape was lost.", bx + 20, by + 56, 18, rl.Color.init(220, 220, 180, 255));
         rl.drawText("Click to try again", bx + 20, by + 92, 14, rl.Color.init(150, 150, 150, 255));
+    }
+
+    // --- complete overlay ---
+    if (map.show_complete) {
+        const W: f32 = @floatFromInt(rl.getScreenWidth());
+        const H: f32 = @floatFromInt(rl.getScreenHeight());
+        const iW: i32 = @intFromFloat(W);
+        const iH: i32 = @intFromFloat(H);
+        rl.drawRectangle(0, 0, iW, iH, rl.Color.init(0, 0, 0, 160));
+        const pw: f32 = @min(420.0, W - 80.0);
+        const ph: f32 = 150.0;
+        const bx: i32 = @intFromFloat((W - pw) * 0.5);
+        const by: i32 = @intFromFloat((H - ph) * 0.5);
+        const ipw: i32 = @intFromFloat(pw);
+        const iph: i32 = @intFromFloat(ph);
+        rl.drawRectangle(bx, by, ipw, iph, rl.Color.init(10, 30, 10, 245));
+        rl.drawRectangleLines(bx, by, ipw, iph, rl.Color.init(60, 200, 60, 255));
+        rl.drawText("Map Complete!", bx + 20, by + 18, 26, rl.Color.init(80, 230, 80, 255));
+        rl.drawText("All levels cleared!", bx + 20, by + 62, 18, rl.Color.init(220, 220, 180, 255));
+        rl.drawText("Click to play again", bx + 20, by + 110, 14, rl.Color.init(150, 150, 150, 255));
+    }
+
+    // --- restart button (bottom-left) ---
+    if (!map.show_complete and !map.show_failed and !map.show_banner) {
+        const H_f: f32 = @floatFromInt(rl.getScreenHeight());
+        const btn_w: i32 = 90;
+        const btn_h: i32 = 32;
+        const btn_x: i32 = 12;
+        const btn_y: i32 = @intFromFloat(H_f - @as(f32, @floatFromInt(btn_h)) - 12);
+        rl.drawRectangle(btn_x, btn_y, btn_w, btn_h, rl.Color.init(40, 40, 50, 220));
+        rl.drawRectangleLines(btn_x, btn_y, btn_w, btn_h, rl.Color.init(160, 160, 160, 200));
+        rl.drawText("Restart", btn_x + 14, btn_y + 9, 14, rl.Color.init(200, 200, 200, 255));
     }
 
     // --- banner overlay ---
