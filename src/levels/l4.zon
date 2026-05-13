@@ -1,0 +1,22 @@
+.{
+    .banner = "Don't let the red get you down.",
+    .defs = .{
+        .{ .fx = 0.2000, .fy = 0.6667, .hw = 80.00, .hh = 5.00, .shape = .rect, .role = .static },
+        .{ .fx = 0.8000, .fy = 0.6667, .hw = 80.00, .hh = 5.00, .shape = .rect, .role = .static },
+        .{ .fx = 0.3375, .fy = 0.5333, .hw = 20.00, .hh = 25.00, .shape = .rect, .role = .green },
+        .{ .fx = 0.6625, .fy = 0.5333, .hw = 20.00, .hh = 25.00, .shape = .rect, .role = .green },
+        .{ .fx = 0.1750, .fy = 0.5500, .hw = 5.00, .hh = 85.00, .shape = .rect, .role = .static, .angle = -0.7854 },
+        .{ .fx = 0.8250, .fy = 0.5500, .hw = 5.00, .hh = 85.00, .shape = .rect, .role = .static, .angle = 0.7854 },
+        .{ .fx = 0.1000, .fy = 0.1500, .hw = 5.00, .hh = 5.00, .shape = .rect, .role = .static },
+        .{ .fx = 0.2000, .fy = 0.1500, .hw = 5.00, .hh = 5.00, .shape = .rect, .role = .static },
+        .{ .fx = 0.8000, .fy = 0.1500, .hw = 5.00, .hh = 5.00, .shape = .rect, .role = .static },
+        .{ .fx = 0.9000, .fy = 0.1500, .hw = 5.00, .hh = 5.00, .shape = .rect, .role = .static },
+        .{ .fx = 0.1500, .fy = 0.1333, .hw = 40.00, .hh = 5.00, .shape = .rect, .role = .support },
+        .{ .fx = 0.8500, .fy = 0.1333, .hw = 40.00, .hh = 5.00, .shape = .rect, .role = .support },
+        .{ .fx = 0.8500, .fy = 0.0833, .radius = 20.00, .role = .support },
+        .{ .fx = 0.1500, .fy = 0.0667, .radius = 30.00, .role = .support },
+        .{ .fx = 0.5000, .fy = 0.6667, .hw = 100.00, .hh = 5.00, .shape = .rect, .role = .static },
+        .{ .fx = 0.3375, .fy = 0.6167, .hw = 35.00, .hh = 25.00, .shape = .rect, .role = .red },
+        .{ .fx = 0.6625, .fy = 0.6167, .hw = 35.00, .hh = 25.00, .shape = .rect, .role = .red },
+    },
+}

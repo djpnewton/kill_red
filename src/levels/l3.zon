@@ -1,12 +1,13 @@
 .{
     .banner = "Time is of the essence.",
     .defs = .{
-        .{ .fx = 0.319, .fy = 0.525, .hw = 110, .hh = 10, .shape = .rect, .role = .static, .angle = 0.35 },
-        .{ .fx = 0.625, .fy = 0.667, .hw = 160, .hh = 10, .shape = .rect, .role = .static },
-        .{ .fx = 0.250, .fy = 0.180, .radius = 18, .role = .green },
-        .{ .fx = 0.7,   .fy = 0.5,   .hw = 5,   .hh = 11, .shape = .rect, .role = .static },
-        .{ .fx = 0.81,  .fy = 0.5,   .hw = 5,   .hh = 11, .shape = .rect, .role = .static },
-        .{ .fx = 0.75,  .fy = 0.45,  .hw = 50,  .hh = 8,  .shape = .rect, .role = .support },
-        .{ .fx = 0.762, .fy = 0.4,   .hw = 32,  .hh = 32, .shape = .rect, .role = .green },
+        .{ .fx = 0.3203, .fy = 0.5303, .hw = 110.00, .hh = 10.00, .shape = .rect, .role = .static, .angle = 0.8101 },
+        .{ .fx = 0.6250, .fy = 0.6670, .hw = 160.00, .hh = 10.00, .shape = .rect, .role = .static },
+        .{ .fx = 0.2313, .fy = 0.1372, .radius = 18.00, .role = .green },
+        .{ .fx = 0.7000, .fy = 0.5000, .hw = 5.00, .hh = 11.00, .shape = .rect, .role = .static },
+        .{ .fx = 0.8100, .fy = 0.5000, .hw = 5.00, .hh = 11.00, .shape = .rect, .role = .static },
+        .{ .fx = 0.7500, .fy = 0.4500, .hw = 50.00, .hh = 8.00, .shape = .rect, .role = .support },
+        .{ .fx = 0.7620, .fy = 0.3733, .hw = 32.00, .hh = 32.00, .shape = .rect, .role = .green },
+        .{ .fx = 0.2012, .fy = 0.3226, .hw = 47.59, .hh = 6.95, .shape = .rect, .role = .static, .angle = 1.1088 },
     },
 }

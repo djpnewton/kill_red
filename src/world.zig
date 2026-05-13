@@ -12,8 +12,7 @@ const std = @import("std");
 const rl = @import("raylib");
 const input = @import("input.zig");
 const b2 = @import("box2d.zig").c;
-
-const DEBUG = true;
+const config = @import("config.zig");
 
 // ---------------------------------------------------------------------------
 // Coordinate helpers  (screen pixels <-> Box2D metres, Y-down in both)
@@ -88,7 +87,7 @@ pub const Map = struct {
         }
 
         // --- number keys: teleport to level (DEBUG only) ---
-        if (DEBUG) {
+        if (config.DEBUG) {
             const keys = [_]rl.KeyboardKey{ .one, .two, .three, .four, .five, .six, .seven, .eight, .nine };
             for (keys, 0..) |key, i| {
                 if (i < levels.len and rl.isKeyPressed(key)) {
@@ -126,7 +125,7 @@ pub const Map = struct {
         }
 
         // --- right-click drag ---
-        if (DEBUG) {
+        if (config.DEBUG) {
             const drag_mouse = rl.getMousePosition();
             if (rl.isMouseButtonPressed(.right)) {
                 self.drag_idx = null;
@@ -259,7 +258,7 @@ pub const Map = struct {
 // Level definitions
 // ---------------------------------------------------------------------------
 
-const BodyDef = struct {
+pub const BodyDef = struct {
     fx: f32,
     fy: f32,
     radius: f32 = 0,
@@ -309,11 +308,12 @@ fn zonToLevel(comptime zon: anytype) LevelDef {
     return def;
 }
 
-const levels = [_]LevelDef{
+var levels = [_]LevelDef{
     zonToLevel(@import("levels/l0.zon")),
     zonToLevel(@import("levels/l1.zon")),
     zonToLevel(@import("levels/l2.zon")),
     zonToLevel(@import("levels/l3.zon")),
+    zonToLevel(@import("levels/l4.zon")),
 };
 
 // ---------------------------------------------------------------------------
@@ -412,6 +412,32 @@ pub fn activeMap() *Map {
     return &active_map;
 }
 
+/// Expose levels slice so editor.zig can read banners.
+pub fn levelsSlice() []const LevelDef {
+    return &levels;
+}
+
+/// Return the raw BodyDef slice for a given level index (for editor init).
+pub fn levelDefs(index: usize) []const BodyDef {
+    const def = &levels[index];
+    return def.defs_arr[0..def.count];
+}
+
+/// Update the in-memory level defs so reloadCurrentLevel picks them up without a rebuild.
+pub fn updateLevelDefs(index: usize, defs: []const BodyDef) void {
+    if (index >= levels.len) return;
+    levels[index].count = defs.len;
+    for (defs, 0..) |d, i| levels[index].defs_arr[i] = d;
+}
+
+/// Reload the current level (call after returning from editor).
+pub fn reloadCurrentLevel() void {
+    if (!initialized) return;
+    const idx = @min(active_map.level, levels.len - 1);
+    active_map.destroyWorld();
+    active_map = loadLevel(idx);
+}
+
 // ---------------------------------------------------------------------------
 // Drawing
 // ---------------------------------------------------------------------------
@@ -425,7 +451,7 @@ pub fn draw() void {
     const map = activeMap();
 
     // --- debug grid (1 cell = 1 Box2D metre = PPM pixels) ---
-    if (DEBUG) {
+    if (config.DEBUG) {
         const W: i32 = rl.getScreenWidth();
         const H: i32 = rl.getScreenHeight();
         const step: i32 = @intFromFloat(PPM);
@@ -479,19 +505,6 @@ pub fn draw() void {
                 rl.drawLineV(corners[2], corners[3], outline);
                 rl.drawLineV(corners[3], corners[0], outline);
             },
-        }
-    }
-
-    if (DEBUG) {
-        const line1 = "*DEBUG* Space: reset  |  Right-click: drag";
-        const line2 = "1-9: jump to level";
-        const font_size = 14;
-        const full = "*DEBUG* Space: reset  |  Right-click: drag  |  1-9: jump to level";
-        if (rl.getScreenWidth() >= rl.measureText(full, font_size) + 20) {
-            rl.drawText(full, 10, 10, font_size, rl.Color.init(160, 160, 160, 200));
-        } else {
-            rl.drawText(line1, 10, 10, font_size, rl.Color.init(160, 160, 160, 200));
-            rl.drawText(line2, 10, 10 + font_size + 2, font_size, rl.Color.init(160, 160, 160, 200));
         }
     }
 
