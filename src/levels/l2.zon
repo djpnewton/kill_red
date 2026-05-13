@@ -1,0 +1,19 @@
+.{
+    .banner = "Dark red boxes are strong. You\nneed another way to get rid of them",
+    .defs = .{
+        .{ .fx = 0.25, .fy = 0.68, .hw = 72, .hh = 14, .shape = .rect, .role = .static },
+        .{ .fx = 0.75, .fy = 0.68, .hw = 72, .hh = 14, .shape = .rect, .role = .static },
+        .{ .fx = 0.23, .fy = 0.62, .hw = 20, .hh = 20, .shape = .rect, .role = .green },
+        .{ .fx = 0.77, .fy = 0.62, .hw = 20, .hh = 20, .shape = .rect, .role = .green },
+        .{ .fx = 0.50, .fy = 0.75, .hw = 20, .hh = 20, .shape = .rect, .role = .red },
+        .{ .fx = 0.28, .fy = 0.52, .hw = 8,  .hh = 18, .shape = .rect, .role = .static },
+        .{ .fx = 0.42, .fy = 0.52, .hw = 8,  .hh = 18, .shape = .rect, .role = .static },
+        .{ .fx = 0.35, .fy = 0.44, .hw = 54, .hh = 8,  .shape = .rect, .role = .support },
+        .{ .fx = 0.35, .fy = 0.31, .hw = 20, .hh = 20, .shape = .rect, .role = .red_hard },
+        .{ .fx = 0.58, .fy = 0.52, .hw = 8,  .hh = 18, .shape = .rect, .role = .static },
+        .{ .fx = 0.72, .fy = 0.52, .hw = 8,  .hh = 18, .shape = .rect, .role = .static },
+        .{ .fx = 0.65, .fy = 0.44, .hw = 54, .hh = 8,  .shape = .rect, .role = .support },
+        .{ .fx = 0.65, .fy = 0.31, .hw = 20, .hh = 20, .shape = .rect, .role = .red_hard },
+        .{ .fx = 0.62, .fy = 0.15, .hw = 18, .hh = 18, .shape = .rect, .role = .red, .vx = -50 },
+    },
+}

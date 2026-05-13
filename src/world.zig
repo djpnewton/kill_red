@@ -273,66 +273,47 @@ const BodyDef = struct {
 };
 
 const LevelDef = struct {
-    defs: []const BodyDef,
+    defs_arr: [MAX_BODIES]BodyDef,
+    count: usize,
     banner: ?[:0]const u8 = null,
 };
 
-const level0_defs = [_]BodyDef{
-    .{ .fx = 0.50, .fy = 0.88, .hw = 280, .hh = 14, .shape = .rect, .role = .static }, // ground platform
-    .{ .fx = 0.35, .fy = 0.80, .hw = 24, .hh = 24, .shape = .rect, .role = .red }, // red block 1
-    .{ .fx = 0.50, .fy = 0.80, .hw = 24, .hh = 24, .shape = .rect, .role = .red }, // red block 2
-    .{ .fx = 0.65, .fy = 0.80, .hw = 24, .hh = 24, .shape = .rect, .role = .red }, // red block 3
-    .{ .fx = 0.50, .fy = 0.68, .hw = 24, .hh = 24, .shape = .rect, .role = .red }, // red block on top
-};
+/// Convert a ZON tuple of anonymous body-def structs to a typed BodyDef array.
+/// ZON structs omit default-valued fields, so we map each field explicitly.
+fn parseZonDefs(comptime tup: anytype) [std.meta.fields(@TypeOf(tup)).len]BodyDef {
+    const N = std.meta.fields(@TypeOf(tup)).len;
+    var arr: [N]BodyDef = undefined;
+    inline for (std.meta.fields(@TypeOf(tup)), 0..) |f, i| {
+        const elem = @field(tup, f.name);
+        const T = @TypeOf(elem);
+        arr[i] = BodyDef{
+            .fx = elem.fx,
+            .fy = elem.fy,
+            .radius = if (@hasField(T, "radius")) elem.radius else 0,
+            .hw = if (@hasField(T, "hw")) elem.hw else 0,
+            .hh = if (@hasField(T, "hh")) elem.hh else 0,
+            .shape = if (@hasField(T, "shape")) elem.shape else .circle,
+            .role = elem.role,
+            .vx = if (@hasField(T, "vx")) elem.vx else 0,
+            .vy = if (@hasField(T, "vy")) elem.vy else 0,
+            .angle = if (@hasField(T, "angle")) elem.angle else 0,
+        };
+    }
+    return arr;
+}
 
-const level1_defs = [_]BodyDef{
-    .{ .fx = 0.38, .fy = 0.78, .hw = 40, .hh = 14, .shape = .rect, .role = .static }, // left platform
-    .{ .fx = 0.45, .fy = 0.78, .hw = 5, .hh = 14, .shape = .rect, .role = .static }, // left platform
-    .{ .fx = 0.38, .fy = 0.72, .hw = 22, .hh = 22, .shape = .rect, .role = .red }, // red block on platform
-    .{ .fx = 0.45, .fy = 0.72, .hw = 22, .hh = 22, .shape = .rect, .role = .red }, // red block on platform
-    .{ .fx = 0.41, .fy = 0.60, .hw = 22, .hh = 22, .shape = .rect, .role = .green }, // green block on red
-};
-
-const level2_defs = [_]BodyDef{
-    .{ .fx = 0.25, .fy = 0.68, .hw = 72, .hh = 14, .shape = .rect, .role = .static }, // left shelf
-    .{ .fx = 0.75, .fy = 0.68, .hw = 72, .hh = 14, .shape = .rect, .role = .static }, // right shelf
-    .{ .fx = 0.23, .fy = 0.62, .hw = 20, .hh = 20, .shape = .rect, .role = .green }, // green on left shelf
-    .{ .fx = 0.77, .fy = 0.62, .hw = 20, .hh = 20, .shape = .rect, .role = .green }, // green on right shelf
-    .{ .fx = 0.50, .fy = 0.75, .hw = 20, .hh = 20, .shape = .rect, .role = .red }, // red on ground (centre)
-    .{ .fx = 0.28, .fy = 0.52, .hw = 8, .hh = 18, .shape = .rect, .role = .static }, // left tower: left post
-    .{ .fx = 0.42, .fy = 0.52, .hw = 8, .hh = 18, .shape = .rect, .role = .static }, // left tower: right post
-    .{ .fx = 0.35, .fy = 0.44, .hw = 54, .hh = 8, .shape = .rect, .role = .support }, // left tower: shelf
-    .{ .fx = 0.35, .fy = 0.31, .hw = 20, .hh = 20, .shape = .rect, .role = .red_hard }, // left tower: dark-red
-    .{ .fx = 0.58, .fy = 0.52, .hw = 8, .hh = 18, .shape = .rect, .role = .static }, // right tower: left post
-    .{ .fx = 0.72, .fy = 0.52, .hw = 8, .hh = 18, .shape = .rect, .role = .static }, // right tower: right post
-    .{ .fx = 0.65, .fy = 0.44, .hw = 54, .hh = 8, .shape = .rect, .role = .support }, // right tower: shelf
-    .{ .fx = 0.65, .fy = 0.31, .hw = 20, .hh = 20, .shape = .rect, .role = .red_hard }, // right tower: dark-red
-    .{ .fx = 0.62, .fy = 0.15, .hw = 18, .hh = 18, .shape = .rect, .role = .red, .vx = -50 }, // sliding red from top
-};
-
-// Level 4: green ball rolls down a ramp onto a flat panel; player clicks the
-// support shelf to drop the large green box and stop the ball at the edge.
-const level3_defs = [_]BodyDef{
-    // Sloped ramp — tilted ~20° down to the right
-    .{ .fx = 0.319, .fy = 0.525, .hw = 110, .hh = 10, .shape = .rect, .role = .static, .angle = 0.35 },
-    // Flat catching panel
-    .{ .fx = 0.625, .fy = 0.667, .hw = 160, .hh = 10, .shape = .rect, .role = .static },
-    // Green ball — falls from above, rolls down ramp, then along flat panel
-    .{ .fx = 0.250, .fy = 0.180, .radius = 18, .shape = .circle, .role = .green },
-    // Static posts supporting the shelf (left and right legs)
-    .{ .fx = 0.7, .fy = 0.5, .hw = 5, .hh = 11, .shape = .rect, .role = .static }, // left post
-    .{ .fx = 0.81, .fy = 0.5, .hw = 5, .hh = 11, .shape = .rect, .role = .static }, // right post
-    // Support shelf holding the green box (click to release)
-    .{ .fx = 0.75, .fy = 0.45, .hw = 50, .hh = 8, .shape = .rect, .role = .support },
-    // Large green box resting on support — drops to stop the ball
-    .{ .fx = 0.762, .fy = 0.4, .hw = 32, .hh = 32, .shape = .rect, .role = .green },
-};
+fn zonToLevel(comptime zon: anytype) LevelDef {
+    const parsed = parseZonDefs(zon.defs);
+    var def: LevelDef = .{ .defs_arr = undefined, .count = parsed.len, .banner = zon.banner };
+    inline for (0..parsed.len) |i| def.defs_arr[i] = parsed[i];
+    return def;
+}
 
 const levels = [_]LevelDef{
-    .{ .defs = &level0_defs, .banner = "You can click light red boxes\nto get rid of them" },
-    .{ .defs = &level1_defs, .banner = "You need to keep the green boxes" },
-    .{ .defs = &level2_defs, .banner = "Dark red boxes are strong. You\nneed another way to get rid of them" },
-    .{ .defs = &level3_defs, .banner = "Time is of the essence." },
+    zonToLevel(@import("levels/l0.zon")),
+    zonToLevel(@import("levels/l1.zon")),
+    zonToLevel(@import("levels/l2.zon")),
+    zonToLevel(@import("levels/l3.zon")),
 };
 
 // ---------------------------------------------------------------------------
@@ -354,7 +335,7 @@ fn loadLevel(index: usize) Map {
 
     var m = Map{
         .bodies = undefined,
-        .count = def.defs.len,
+        .count = def.count,
         .level = index,
         .drag_idx = null,
         .world_id = world_id,
@@ -364,7 +345,7 @@ fn loadLevel(index: usize) Map {
         .show_complete = false,
     };
 
-    for (def.defs, 0..) |d, i| {
+    for (def.defs_arr[0..def.count], 0..) |d, i| {
         // Uniform scale from fixed 800x600 reference so physics distances
         // are identical on every screen size. World is centered (letterboxed).
         const scale: f32 = @min(W / 800.0, H / 600.0);

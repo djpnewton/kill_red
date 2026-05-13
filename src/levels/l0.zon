@@ -1,0 +1,10 @@
+.{
+    .banner = "You can click light red boxes\nto get rid of them",
+    .defs = .{
+        .{ .fx = 0.50, .fy = 0.88, .hw = 280, .hh = 14, .shape = .rect, .role = .static },
+        .{ .fx = 0.35, .fy = 0.80, .hw = 24, .hh = 24, .shape = .rect, .role = .red },
+        .{ .fx = 0.50, .fy = 0.80, .hw = 24, .hh = 24, .shape = .rect, .role = .red },
+        .{ .fx = 0.65, .fy = 0.80, .hw = 24, .hh = 24, .shape = .rect, .role = .red },
+        .{ .fx = 0.50, .fy = 0.68, .hw = 24, .hh = 24, .shape = .rect, .role = .red },
+    },
+}

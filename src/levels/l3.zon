@@ -1,0 +1,12 @@
+.{
+    .banner = "Time is of the essence.",
+    .defs = .{
+        .{ .fx = 0.319, .fy = 0.525, .hw = 110, .hh = 10, .shape = .rect, .role = .static, .angle = 0.35 },
+        .{ .fx = 0.625, .fy = 0.667, .hw = 160, .hh = 10, .shape = .rect, .role = .static },
+        .{ .fx = 0.250, .fy = 0.180, .radius = 18, .role = .green },
+        .{ .fx = 0.7,   .fy = 0.5,   .hw = 5,   .hh = 11, .shape = .rect, .role = .static },
+        .{ .fx = 0.81,  .fy = 0.5,   .hw = 5,   .hh = 11, .shape = .rect, .role = .static },
+        .{ .fx = 0.75,  .fy = 0.45,  .hw = 50,  .hh = 8,  .shape = .rect, .role = .support },
+        .{ .fx = 0.762, .fy = 0.4,   .hw = 32,  .hh = 32, .shape = .rect, .role = .green },
+    },
+}
