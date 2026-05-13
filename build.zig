@@ -74,8 +74,33 @@ pub fn build(b: *std.Build) !void {
     if (target.query.os_tag == .emscripten) {
         const emsdk = rlz.emsdk;
 
-        // box2d needs the emscripten sysroot headers (e.g. math.h) when compiling for wasm
+        // box2d needs cache/sysroot/include (populated by first emcc run).
+        // Without explicit ordering, zig may start box2d compilation in parallel
+        // with emsdk activation, before the sysroot exists on a cold runner.
+        // Fix: activate emsdk + run a trivial emcc compile BEFORE box2d compiles.
         const emsdk_dep = b.dependency("emsdk", .{});
+        const emsdk_root = emsdk_dep.path("").getPath(b);
+        const emsdk_script = std.fs.path.join(b.allocator, &.{ emsdk_root, "emsdk" }) catch unreachable;
+        const emcc_exe = std.fs.path.join(b.allocator, &.{ emsdk_root, "upstream", "emscripten", "emcc" }) catch unreachable;
+
+        const chmod_emsdk = b.addSystemCommand(&.{ "chmod", "+x", emsdk_script });
+        const emsdk_install = b.addSystemCommand(&.{ emsdk_script, "install", "4.0.3" });
+        emsdk_install.step.dependOn(&chmod_emsdk.step);
+        const emsdk_activate = b.addSystemCommand(&.{ emsdk_script, "activate", "4.0.3" });
+        emsdk_activate.step.dependOn(&emsdk_install.step);
+        const chmod_emcc = b.addSystemCommand(&.{ "chmod", "+x", emcc_exe });
+        chmod_emcc.step.dependOn(&emsdk_activate.step);
+
+        // Compile a trivial C file to trigger emscripten's sysroot cache generation.
+        const warmup_src = b.addWriteFiles();
+        const warmup_c = warmup_src.add("warmup.c", "void x(){}");
+        const warmup_cmd = b.addSystemCommand(&.{ emcc_exe, "-c" });
+        warmup_cmd.addFileArg(warmup_c);
+        warmup_cmd.addArg("-o");
+        _ = warmup_cmd.addOutputFileArg("warmup.o");
+        warmup_cmd.step.dependOn(&chmod_emcc.step);
+
+        box2d_lib.step.dependOn(&warmup_cmd.step);
         box2d_lib.root_module.addIncludePath(emsdk_dep.path("upstream/emscripten/cache/sysroot/include"));
 
         const wasm = b.addLibrary(.{
